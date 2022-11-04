@@ -1,29 +1,21 @@
 const { Schema, model } = require('mongoose');
-
-const courseSchema = new Schema(
+const reactionSchema = require('./Reaction');
+const thoughtSchema = new Schema(
   {
-    : {
+    thoughtText: {
       type: String,
       required: true,
     },
-    inPerson: {
-      type: Boolean,
-      default: true,
+    username: {
+      type: String,
+      required: true,
     },
-    startDate: {
-      type: Date,
-      default: Date.now(),
-    },
-    endDate: {
+    createdAt: {
       type: Date,
       default: () => new Date(+new Date() + 84 * 24 * 60 * 60 * 1000),
     },
-    students: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Student',
-      },
-    ],
+    reactions: [
+      reactionSchema
   },
   {
     toJSON: {
@@ -33,6 +25,6 @@ const courseSchema = new Schema(
   }
 );
 
-const Course = model('course', courseSchema);
+const Thought = model('thought', thoughtSchema);
 
-module.exports = Course;
+module.exports = Thought;
