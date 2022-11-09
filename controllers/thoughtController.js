@@ -21,14 +21,14 @@ module.exports = {
   },
   // Get a single student
   getSingleStudent(req, res) {
-    Student.findOne({ _id: req.params.userId })
+    Thought.findOne({ _id: req.params.userId })
       .select('-__v')
       .lean()
-      .then(async (student) =>
-        !student
-          ? res.status(404).json({ message: 'No student with that ID' })
+      .then(async (thought) =>
+        !thought
+          ? res.status(404).json({ message: 'No thought with that ID' })
           : res.json({
-              student,
+              thought,
               grade: await grade(req.params.userId),
             })
       )
@@ -37,18 +37,18 @@ module.exports = {
         return res.status(500).json(err);
       });
   },
-  // create a new student
-  createStudent(req, res) {
-    Student.create(req.body)
-      .then((student) => res.json(student))
+  // create a new thought
+  createThought(req, res) {
+    Thought.create(req.body)
+      .then((thought) => res.json(thought))
       .catch((err) => res.status(500).json(err));
   },
-  // Delete a student and remove them from the course
+  // Delete a thought and remove them from the path
   deleteStudent(req, res) {
-    Student.findOneAndRemove({ _id: req.params.userId })
-      .then((student) =>
-        !student
-          ? res.status(404).json({ message: 'No such student exists' })
+    Thought.findOneAndRemove({ _id: req.params.userId })
+      .then((thought) =>
+        !thought
+          ? res.status(404).json({ message: 'No such thought exists' })
           : Course.findOneAndUpdate(
               { User: req.params.userId },
               { $pull: { User: req.params.userId } },
@@ -58,9 +58,9 @@ module.exports = {
       .then((course) =>
         !course
           ? res.status(404).json({
-              message: 'Student deleted, but no courses found',
+              message: 'Thought deleted, but no courses found',
             })
-          : res.json({ message: 'Student successfully deleted' })
+          : res.json({ message: 'Thought successfully deleted' })
       )
       .catch((err) => {
         console.log(err);
@@ -72,33 +72,33 @@ module.exports = {
   addAssignment(req, res) {
     console.log('You are adding an assignment');
     console.log(req.body);
-    Student.findOneAndUpdate(
+    Thought.findOneAndUpdate(
       { _id: req.params.userId },
       { $addToSet: { assignments: req.body } },
       { runValidators: true, new: true }
     )
-      .then((student) =>
-        !student
+      .then((thought) =>
+        !thought
           ? res
               .status(404)
-              .json({ message: 'No student found with that ID :(' })
-          : res.json(student)
+              .json({ message: 'No thought found with that ID :(' })
+          : res.json(thought)
       )
       .catch((err) => res.status(500).json(err));
   },
   // Remove assignment from a student
   removeAssignment(req, res) {
-    Student.findOneAndUpdate(
+    Thought.findOneAndUpdate(
       { _id: req.params.userId },
       { $pull: { assignment: { assignmentId: req.params.assignmentId } } },
       { runValidators: true, new: true }
     )
-      .then((student) =>
+      .then((thought) =>
         !student
           ? res
               .status(404)
-              .json({ message: 'No student found with that ID :(' })
-          : res.json(student)
+              .json({ message: 'No thought found with that ID :(' })
+          : res.json(thought)
       )
       .catch((err) => res.status(500).json(err));
   },
