@@ -1,36 +1,50 @@
-// ObjectId() method for converting userId string into an ObjectId for querying database
-const { ObjectId } = require('mongoose').Types;
+
 const { User, Thought } = require('../models');
 
 
 module.exports = {
   // Get all User
-  getUser(req, res) {
-    User.find()
-      .then(async (User) => {
-        const userObj = {
-          User,
-          headCount: await headCount(),
-        };
-        return res.json(userObj);
+  getAllThought(req, res) {
+    Thought
+      .find()
+      .then(async (thought) => {
+
+        return res.json(thought);
       })
       .catch((err) => {
         console.log(err);
         return res.status(500).json(err);
       });
   },
+
+
+  // Update a Thought
+  updateThought(req, res) {
+    Thought.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { runValidators: true, new: true }
+    )
+      .then((thought) =>
+        !thought
+          ? res.status(404).json({ message: 'No Thought with this id!' })
+          : res.json(thought)
+      )
+      .catch((err) => res.status(500).json(err));
+  },
+
   // Get a single student
-  getSingleStudent(req, res) {
-    Thought.findOne({ _id: req.params.userId })
+  getSingleThought(req, res) {
+    Thought.findOne({ _id: req.params.id })
       .select('-__v')
       .lean()
       .then(async (thought) =>
         !thought
           ? res.status(404).json({ message: 'No thought with that ID' })
           : res.json({
-              thought,
-              grade: await grade(req.params.userId),
-            })
+            thought,
+            grade: await grade(req.params.userId),
+          })
       )
       .catch((err) => {
         console.log(err);
@@ -44,23 +58,20 @@ module.exports = {
       .catch((err) => res.status(500).json(err));
   },
   // Delete a thought and remove them from the path
-  deleteStudent(req, res) {
-    Thought.findOneAndRemove({ _id: req.params.userId })
+  deleteThought(req, res) {
+    Thought.findOneAndRemove({ _id: req.params.id })
       .then((thought) =>
         !thought
           ? res.status(404).json({ message: 'No such thought exists' })
-          : Course.findOneAndUpdate(
-              { User: req.params.userId },
-              { $pull: { User: req.params.userId } },
-              { new: true }
-            )
+          : User.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $pull: { thoughts: req.params.id } },
+            { new: true }
+          )
       )
-      .then((course) =>
-        !course
-          ? res.status(404).json({
-              message: 'Thought deleted, but no courses found',
-            })
-          : res.json({ message: 'Thought successfully deleted' })
+      .then((data) =>
+
+        res.json({ message: 'Thought successfully deleted', data: data })
       )
       .catch((err) => {
         console.log(err);
@@ -68,38 +79,32 @@ module.exports = {
       });
   },
 
-  // Add an assignment to a student
-  addAssignment(req, res) {
-    console.log('You are adding an assignment');
+  // Add a reaction to a thought
+  addReaction(req, res) {
+    console.log('You are adding an reaction');
     console.log(req.body);
     Thought.findOneAndUpdate(
-      { _id: req.params.userId },
-      { $addToSet: { assignments: req.body } },
+      { _id: req.params.id },
+      { $addToSet: { reactions: req.body } },
       { runValidators: true, new: true }
     )
       .then((thought) =>
         !thought
           ? res
-              .status(404)
-              .json({ message: 'No thought found with that ID :(' })
+            .status(404)
+            .json({ message: 'No thought found with that ID :(' })
           : res.json(thought)
       )
       .catch((err) => res.status(500).json(err));
   },
-  // Remove assignment from a student
-  removeAssignment(req, res) {
+  // Remove reaction from a thought
+  removeReaction(req, res) {
     Thought.findOneAndUpdate(
-      { _id: req.params.userId },
-      { $pull: { assignment: { assignmentId: req.params.assignmentId } } },
+      { _id: req.params.id },
+      { $pull: { reaction: { reactionId: req.params.reactionId } } },
       { runValidators: true, new: true }
-    )
-      .then((thought) =>
-        !student
-          ? res
-              .status(404)
-              .json({ message: 'No thought found with that ID :(' })
-          : res.json(thought)
-      )
-      .catch((err) => res.status(500).json(err));
-  },
-};
+    ).then((thought) =>
+      res.json(thought)
+    ).catch((err) => res.status(500).json(err))
+  }
+}
