@@ -38,13 +38,9 @@ module.exports = {
     Thought.findOne({ _id: req.params.id })
       .select('-__v')
       .lean()
-      .then(async (thought) =>
-        !thought
-          ? res.status(404).json({ message: 'No thought with that ID' })
-          : res.json({
-            thought,
-            grade: await grade(req.params.userId),
-          })
+      .then(thought =>
+        
+          res.json(thought)
       )
       .catch((err) => {
         console.log(err);
@@ -101,7 +97,7 @@ module.exports = {
   removeReaction(req, res) {
     Thought.findOneAndUpdate(
       { _id: req.params.id },
-      { $pull: { reaction: { reactionId: req.params.reactionId } } },
+      { $pull: { reactions: { reactionId: req.params.reactionid } } },
       { runValidators: true, new: true }
     ).then((thought) =>
       res.json(thought)

@@ -14,8 +14,7 @@ const thoughtSchema = new Schema(
       type: Date,
       default: () => new Date(+new Date() + 84 * 24 * 60 * 60 * 1000),
     },
-    reactions: [
-      reactionSchema
+    reactions: [reactionSchema]
   },
   {
     toJSON: {
