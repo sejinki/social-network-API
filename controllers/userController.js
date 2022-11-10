@@ -32,15 +32,15 @@ module.exports = {
       .catch((err) => res.status(500).json(err));
   },
   // Update a Thought
-  updateThought(req, res) {
-    Thought.findOneAndUpdate(
-      { _id: req.params.thoughtId },
+  updateUser(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.id },
       { $set: req.body },
       { runValidators: true, new: true }
     )
-      .then((thought) =>
+      .then((user) =>
        
-          res.json(thought)
+          res.json(user)
       )
       .catch((err) => res.status(500).json(err));
   },
